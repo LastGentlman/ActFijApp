@@ -9,8 +9,10 @@
     "react-scripts": "5.0.1"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
+    "start": "concurrently \"npm:watch-css\" \"npm:react-start\"",
+    "react-start": "react-scripts start",
+    "watch-css": "tailwindcss -i ./src/index.css -o ./src/tailwind.css --watch",
+    "build": "tailwindcss -i ./src/index.css -o ./src/tailwind.css && react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
