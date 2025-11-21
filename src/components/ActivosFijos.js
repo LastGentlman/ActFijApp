@@ -1,7 +1,50 @@
 import React, { useState, useMemo } from 'react';
-import { Download, Plus, Edit2, Trash2, X, Save } from 'lucide-react';
+import { Download, Plus, Edit2, Trash2, X, Save, Send } from 'lucide-react';
 
 const ActivosFijos = () => {
+  const [mensajeFirefly, setMensajeFirefly] = useState(null);
+
+  const enviarAFirefly = async (activo) => {
+    setMensajeFirefly('Enviando a Firefly III...');
+    const fireflyTransaction = {
+      transactions: [
+        {
+          type: 'withdrawal', // Retiro, ya que es una compra de activo
+          date: new Date().toISOString().split('T')[0], // Fecha actual
+          amount: activo.valor.toString(),
+          description: `Compra de Activo Fijo: ${activo.item}`,
+          source_name: activo.fuente, // Usamos la fuente como cuenta de origen
+          destination_name: activo.categoria, // Usamos la categoría como cuenta de destino (o etiqueta/categoría en Firefly)
+          // Nota: Firefly III requiere que source_name y destination_name sean cuentas existentes.
+          // Para simplificar, asumimos que 'fuente' es una cuenta de origen y 'categoria' es una cuenta de gasto/destino.
+          // En una implementación real, el usuario debería mapear esto a IDs de cuentas de Firefly.
+        },
+      ],
+    };
+
+    try {
+      const response = await fetch('/api/firefly/transactions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(fireflyTransaction),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setMensajeFirefly('¡Transacción enviada a Firefly III con éxito!');
+      } else {
+        setMensajeFirefly(`Error al enviar a Firefly III: ${data.error || response.statusText}`);
+        console.error('Error de Firefly III:', data);
+      }
+    } catch (error) {
+      setMensajeFirefly('Error de conexión con el servidor proxy.');
+      console.error('Error de conexión:', error);
+    }
+    setTimeout(() => setMensajeFirefly(null), 5000);
+  };
   const datosIniciales = [
     // ... (aquí va tu lista completa de 45 activos)
     { id: 1, categoria: 'Estación de Trabajo', item: 'PC', valor: 8546, fuente: 'Amazon' },
@@ -49,6 +92,12 @@ const ActivosFijos = () => {
 
   const guardarActivo = () => {
     // ... (tu lógica de guardado)
+
+    // Lógica para enviar a Firefly III
+    const activoGuardado = editando ? activos.find(a => a.id === editando) : { ...formulario, id: activos.length + 1, valor: parseFloat(formulario.valor) };
+    if (activoGuardado) {
+      enviarAFirefly(activoGuardado);
+    }
   };
 
   const eliminarActivo = (id) => {
@@ -63,12 +112,21 @@ const ActivosFijos = () => {
     <div className="min-h-screen bg-gray-50 p-4 sm:p-6">
       <div className="max-w-7xl mx-auto">
         {/* --- ENCABEZADO RESPONSIVO --- */}
+        {mensajeFirefly && (
+          <div className={`p-3 mb-4 rounded-lg text-white font-semibold ${mensajeFirefly.includes('Error') ? 'bg-red-500' : 'bg-blue-500'}`}>
+            {mensajeFirefly}
+          </div>
+        )}
         <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
           <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 text-center md:text-left">
               Registro de Activos Fijos
             </h1>
             <div className="flex gap-3 justify-center md:justify-end">
+              <button onClick={() => activos.forEach(enviarAFirefly)} className="flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition">
+                <Send size={20} />
+                <span className="hidden sm:inline">Enviar a Firefly</span>
+              </button>
               <button onClick={() => abrirModal()} className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
                 <Plus size={20} />
                 <span className="hidden sm:inline">Agregar</span>

@@ -3,26 +3,40 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "body-parser": "^2.2.0",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "http-proxy-middleware": "^3.0.5",
     "lucide-react": "^0.309.0",
+    "node-fetch": "^3.3.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-scripts": "5.0.1"
   },
   "scripts": {
-    "start": "concurrently \"npm:watch-css\" \"npm:react-start\"",
+    "start": "concurrently \"npm:watch-css\" \"npm:react-start\" \"npm:server\"",
     "react-start": "react-scripts start",
     "watch-css": "tailwindcss -i ./src/index.css -o ./src/tailwind.css --watch",
     "build": "tailwindcss -i ./src/index.css -o ./src/tailwind.css && react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "server": "node server.js"
   },
   "devDependencies": {
-    "tailwindcss": "^3.4.1",
+    "autoprefixer": "^10.4.17",
     "postcss": "^8.4.33",
-    "autoprefixer": "^10.4.17"
+    "tailwindcss": "^3.4.1"
   },
   "browserslist": {
-    "production": [">0.2%", "not dead", "not op_mini all"],
-    "development": ["last 1 chrome version", "last 1 firefox version", "last 1 safari version"]
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
   }
 }
